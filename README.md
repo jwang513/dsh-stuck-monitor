@@ -1,5 +1,7 @@
 # dsh-stuck-monitor
 
+> Passive dsh recorder: replays the main agent and all subagents on one timeline, flags where they got stuck, and writes an on-demand AI cause-and-effect review. README in Chinese.
+
 DeepSeek Harness（dsh）插件：把一次对话里**主 agent 和它派出的所有 subagent** 做的每件事，按时间记录下来，在会话视图栏的"会话复盘"标签里用时间线回放。出问题的地方会标红点，需要时还能让 AI 写一份复盘，讲清楚前因后果。
 
 它只记录，不干预：不会提醒、纠正或拦截 agent。
@@ -50,7 +52,7 @@ DeepSeek Harness（dsh）插件：把一次对话里**主 agent 和它派出的�
 
 | 记录 | 怎么判断 |
 |---|---|
-| 探查 | 连续 15 次以上只读调用（read、grep、glob、web_*）。在时间线上显示为灰色斜纹区段 |
+| 探查 | 连续 15 次以上只读调用（read、grep、glob、search、ls、web_* 等）。在时间线上显示为灰色斜纹区段 |
 | 长思考 | 单次回复的推理超过 8000 tokens。真正撑爆的情况会被“输出撞上限”标出来 |
 
 这些记录是否合理，要结合 agent 的任务来判断，比如只读的探查任务本来就该大量读取。AI 复盘会结合任务去看。
@@ -62,21 +64,25 @@ DeepSeek Harness（dsh）插件：把一次对话里**主 agent 和它派出的�
 - 默认使用这次对话本身用的模型，也可以在配置里指定别的模型。调用走的是 dsh 自己的模型服务，和 dsh 自动生成会话标题用的是同一条路。
 - 生成结果保存在本地。会话之后如果还有新进展，复盘卡片上会提示"可重新生成"。
 
+## 要求
+
+- Node.js 24 或更高
+- dsh 0.2.1-rc.5 上开发和测试
+
 ## 安装
 
-先关掉正在运行的 dsh：
+先关掉正在运行的 dsh，然后在你的 dsh 项目目录里运行：
 
-```powershell
-cd C:\Users\wotem\Desktop\dsh-web
-npx dsh plugin --profile web add link:C:/Users/wotem/Desktop/dsh-web/plugins/dsh-stuck-monitor
+```bash
+npx dsh plugin --profile web add https://github.com/jwang513/dsh-stuck-monitor
 npx dsh web
 ```
 
-已经装过的话，直接重启 `npx dsh web` 即可。
+`--profile web` 换成你实际用的 profile 名。已经装过的话，直接重启 `npx dsh web` 即可。
 
 ## 配置
 
-在 `C:\Users\wotem\.dsh\profiles\web\cordis.patch.yml` 末尾加：
+在 `~/.dsh/profiles/<profile>/cordis.patch.yml` 末尾加（Windows 上 `~` 就是 `C:\Users\<用户名>`）：
 
 ```yaml
 - id: stuck-monitor
@@ -95,7 +101,7 @@ npx dsh web
 
 ## 记录存在哪
 
-`C:\Users\wotem\.dsh\stuck-monitor\sessions\` 下，每次对话三个文件：
+`~/.dsh/stuck-monitor/sessions/` 下（可以用配置里的 `outputDir` 改），每次对话三个文件：
 
 - `<id>.session.json`：完整的事件流、分段和问题
 - `<id>.meta.json`：列表里显示的摘要
@@ -133,3 +139,7 @@ npx dsh web
 - 记录每 5 秒写一次盘。dsh 重启后，同一个会话继续进行时会先读回已有记录再接着写；但 dsh 崩溃前最后几秒的记录可能丢失。
 - 插件安装之前就结束的会话没有记录。
 - 用户用 `/skill名` 直接调用的 skill 不算作工具调用，但用户那句话本身会出现在时间线里。
+
+## 许可证
+
+MIT
