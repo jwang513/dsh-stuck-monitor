@@ -1,0 +1,16 @@
+# dsh-stuck-monitor: passive recorder + "会话复盘" panel in Settings.
+# It only observes; it never blocks, rewrites or reminds agents.
+# Override fields in your profile's cordis.patch.yml with
+#   - id: stuck-monitor
+#     name: 'dsh-stuck-monitor'
+#     config: { ... }
+- insert:
+    - id: stuck-monitor
+      name: 'dsh-stuck-monitor'
+      config:
+        # Where recordings go. Empty = ~/.dsh/stuck-monitor
+        outputDir: ''
+        # Model for the AI review. Empty = the model the conversation itself used.
+        aiProvider: ''
+        aiModel: ''
+        aiMaxTokens: 6000
